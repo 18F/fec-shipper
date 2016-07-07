@@ -2,6 +2,25 @@
 
 This repository holds a set of scripts for importing legal data into openFEC api.
 
+# Running
+
+To load regs, run
+
+```bash
+$ python regulations.py env
+```
+Where env can be local, feature, stage or prod.
+
+Note: When regulations need to be removed, the best way to do that is to drop the
+elastic search instance and re-add it, by doing:
+
+```bash
+$ cf unbind fec-search-prod api
+$ cf delete-service fec-search-prod
+$ cf create-service elasticsearch-swarm-1.7.1 1x fec-search-prod
+$ cf restage api
+```
+
 ## Public domain
 This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
 

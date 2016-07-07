@@ -66,14 +66,19 @@ def get_regs():
 for docs in get_regs():
     if env == 'local':
         url = 'http://localhost:5000/v1/load/legal/'
-    else:
+    if env == 'dev' or env == 'feature':
         url = 'https://fec-%s-api.18f.gov/v1/load/legal/' % env
+    if env == 'stage':
+        url = 'https://fec-stage-api.18f.gov/v1/load/legal/'
+    if env == 'prod':
+        url = 'https://api.open.fec.gov/v1/load/legal/?api_key=%s' \
+                    % os.environ['FEC_API_KEY']
     data = {'doc_type': 'regulations', 'docs': docs,
             'api_key': os.environ['FEC_API_KEY']}
     headers = {'Content-Type': 'application/json'}
     r = requests.post(url, data=json.dumps(data), headers=headers)
-    print(r)
     result = r.json()
+    print(result)
     if not result['success']:
         print(result)
 

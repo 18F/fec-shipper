@@ -2,16 +2,43 @@ import requests
 import json
 import sys
 import os
+from datetime import datetime
 
 # local, feature, dev, stage or prod
 env = sys.argv[1] if len(sys.argv) > 1 else 'local'
 
-if env == 'local' or env == 'dev':
+if env == 'local' or env == 'dev' or env == 'feature':
     list_regs_url = 'https://fec-stage-eregs.18f.gov/api/regulation'
 else:
     list_regs_url = 'https://fec-%s-eregs.18f.gov/api/regulation' % env
 
 reg_versions = requests.get(list_regs_url).json()['versions']
+print(reg_versions)
+
+regs = {}
+for reg in reg_versions:
+    if '2016-annual' in reg['version']:
+        regs[reg['regulation']] = reg
+
+for reg in reg_versions:
+    if reg['regulation'] not in regs:
+        by_date = datetime.strptime(reg['by_date'], "%Y-%m-%d")
+        most_recent = datetime.strptime(regs[reg['by_date']], "%Y-%m-%d") \
+            if reg['by_date'] in regs else datetime(1900, 1, 1)
+        if by_date > most_recent:
+            regs[reg['regulation']] = reg
+        print(reg)
+
+print('total regs: %d' % len(regs))
+
+reg_versions = regs.values()
+
+annual_count = 0
+for reg in reg_versions:
+    if '2016-annual' in reg['version']:
+        annual_count += 1
+
+print('annual count: %d' % annual_count)
 
 
 def get_sections(reg):
@@ -37,7 +64,7 @@ def get_text(node):
 
 def get_regs():
     for reg in reg_versions:
-        if env == 'local' or env == 'dev':
+        if env == 'local' or env == 'dev' or env == 'feature':
             url = 'https://fec-stage-eregs.18f.gov/api/regulation/%s/%s' \
                 % (reg['regulation'], reg['version'])
         else:
@@ -63,6 +90,7 @@ def get_regs():
 
         yield docs
 
+
 for docs in get_regs():
     if env == 'local':
         url = 'http://localhost:5000/v1/load/legal/'
@@ -82,4 +110,6 @@ for docs in get_regs():
     if not result['success']:
         print(result)
 
+
+print(reg_versions)
 print('done.')

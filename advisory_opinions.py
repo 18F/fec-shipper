@@ -9,7 +9,7 @@ env = sys.argv[1] if len(sys.argv) > 1 else 'local'
 
 csv.field_size_limit(10000000)
 
-f = open('ao_tables/AO.txt')
+f = open('data/AO.txt')
 reader = csv.reader(f, delimiter=',', quotechar='"')
 
 i = 0
@@ -21,7 +21,7 @@ for row in reader:
         ao_data[row[ao_header.index('AO_ID')]] = row
     i += 1
 
-f = open('ao_tables/DOCUMENT.txt')
+f = open('data/DOCUMENT.txt')
 
 reader = csv.reader(f, delimiter=',', quotechar='"')
 
@@ -41,6 +41,7 @@ def get_docs():
                 doc = {"doc_id": row[header.index('DOCUMENT_ID')],
                        "text": row[header.index('OCRTEXT')],
                        "description": row[header.index('DESCRIPTION')],
+                       "category": row[header.index('CATEGORY')],
                        "id": row[header.index('AO_ID')],
                        "name": ao[ao_header.index('NAME')],
                        "summary": ao[ao_header.index('SUMMARY')],
@@ -49,7 +50,7 @@ def get_docs():
                        "url": pdf_url}
                 docs.append(doc)
             except:
-                print row
+                print(row)
 
         i += 1
 
